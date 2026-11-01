@@ -1,5 +1,4 @@
 import streamlit as st
-import exercicio_01_basico as biblioteca
 
 
 st.set_page_config(
@@ -7,46 +6,44 @@ st.set_page_config(
     page_icon="📚"
 )
 
+
 st.title("📚 Sistema de Biblioteca")
-st.write("Atividade com Python, Neo4j e Streamlit.")
 
-
-if st.button("Inicializar banco de dados", use_container_width=True):
-    try:
-        biblioteca.setup_database()
-        st.success("Banco de dados inicializado com sucesso.")
-    except Exception as erro:
-        st.error(f"Erro ao inicializar o banco: {erro}")
-
-
-st.divider()
-
-
-if st.button("Executar todas as questões", use_container_width=True):
-    try:
-        biblioteca.questao_01_criar_livro()
-        biblioteca.questao_02_criar_autor()
-        biblioteca.questao_03_criar_relacionamento()
-        biblioteca.questao_04_listar_livros()
-        biblioteca.questao_05_listar_autores()
-        biblioteca.questao_06_buscar_livro_por_titulo()
-        biblioteca.questao_07_atualizar_paginas()
-        biblioteca.questao_08_livros_por_genero()
-        biblioteca.questao_09_livros_por_autor()
-        biblioteca.questao_10_usuarios_com_emprestimos()
-        biblioteca.questao_11_emprestimos_pendentes()
-        biblioteca.questao_12_deletar_livro()
-        biblioteca.questao_13_contar_livros_por_autor()
-        biblioteca.questao_14_livros_apos_1950()
-        biblioteca.questao_15_marcar_livros_disponiveis()
-
-        st.success("Todas as questões foram executadas com sucesso.")
-
-    except Exception as erro:
-        st.error(f"Erro durante a execução: {erro}")
-
-
-st.info(
-    "O Neo4j precisa estar em execução em bolt://localhost:7687 "
-    "com a senha configurada no arquivo exercicio_01_basico.py."
+st.write(
+    "Aplicação desenvolvida com Python, Neo4j e Streamlit."
 )
+
+st.success("O Streamlit está funcionando corretamente!")
+
+st.header("Atividade")
+
+st.write("Este projeto contém 15 questões sobre um sistema de biblioteca.")
+
+questoes = [
+    "Questão 01 - Criar livro",
+    "Questão 02 - Criar autor",
+    "Questão 03 - Criar relacionamento",
+    "Questão 04 - Listar livros",
+    "Questão 05 - Listar autores",
+    "Questão 06 - Buscar livro por título",
+    "Questão 07 - Atualizar páginas",
+    "Questão 08 - Livros por gênero",
+    "Questão 09 - Livros por autor",
+    "Questão 10 - Usuários com empréstimos",
+    "Questão 11 - Empréstimos pendentes",
+    "Questão 12 - Deletar livro",
+    "Questão 13 - Contar livros por autor",
+    "Questão 14 - Livros após 1950",
+    "Questão 15 - Livros disponíveis"
+]
+
+questao = st.selectbox(
+    "Escolha uma questão:",
+    questoes
+)
+
+st.write("Questão escolhida:")
+st.info(questao)
+
+if st.button("Executar questão"):
+    st.success(f"{questao} selecionada com sucesso!")
