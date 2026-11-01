@@ -2,8 +2,9 @@ import streamlit as st
 from neo4j import GraphDatabase
 
 st.set_page_config(
-    page_title="Biblioteca Neo4j",
-    page_icon="📚"
+    page_title="Sistema de Biblioteca",
+    page_icon="📚",
+    layout="wide"
 )
 
 
