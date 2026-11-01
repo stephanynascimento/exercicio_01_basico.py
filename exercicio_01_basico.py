@@ -5,16 +5,13 @@ Banco de Grafos Neo4j com Python
 Tema: Sistema de Biblioteca
 =============================================================
 
-Pré-requisitos:
+Instalação:
     pip install neo4j
 
-Configuração:
-    - Neo4j rodando em localhost:7687
-    - Usuário: neo4j
-    - Senha: password
-
-Para executar:
-    python exercicio_01_basico.py
+Configuração padrão:
+    Neo4j: localhost:7687
+    Usuário: neo4j
+    Senha: password
 =============================================================
 """
 
@@ -23,6 +20,7 @@ from neo4j import GraphDatabase
 
 URI = "bolt://localhost:7687"
 AUTH = ("neo4j", "password")
+
 
 driver = GraphDatabase.driver(URI, auth=AUTH)
 
@@ -191,11 +189,11 @@ def setup_database():
 
 # ==============================================================
 # QUESTÃO 01
-# Cria um novo livro chamado "O Cortiço"
+# Cria o livro O Cortiço
 # ==============================================================
 def questao_01_criar_livro():
     with driver.session() as session:
-        result = session.run(
+        resultado = session.run(
             """
             CREATE (l:Livro {
                 titulo: 'O Cortiço',
@@ -210,9 +208,9 @@ def questao_01_criar_livro():
             """
         )
 
-        livro = result.single()
+        livro = resultado.single()
 
-    print("Q01 - Livro criado:", livro)
+    print("Q01 - Livro criado:", dict(livro))
 
 
 # ==============================================================
@@ -221,7 +219,7 @@ def questao_01_criar_livro():
 # ==============================================================
 def questao_02_criar_autor():
     with driver.session() as session:
-        result = session.run(
+        resultado = session.run(
             """
             CREATE (a:Autor {
                 nome: 'Aluísio Azevedo',
@@ -232,9 +230,9 @@ def questao_02_criar_autor():
             """
         )
 
-        autor = result.single()
+        autor = resultado.single()
 
-    print("Q02 - Autor criado:", autor)
+    print("Q02 - Autor criado:", dict(autor))
 
 
 # ==============================================================
@@ -243,7 +241,7 @@ def questao_02_criar_autor():
 # ==============================================================
 def questao_03_criar_relacionamento():
     with driver.session() as session:
-        result = session.run(
+        resultado = session.run(
             """
             MATCH (a:Autor {nome: 'Aluísio Azevedo'})
             MATCH (l:Livro {titulo: 'O Cortiço'})
@@ -254,18 +252,18 @@ def questao_03_criar_relacionamento():
             """
         )
 
-        relacionamento = result.single()
+        relacionamento = resultado.single()
 
-    print("Q03 - Relacionamento criado:", relacionamento)
+    print("Q03 - Relacionamento criado:", dict(relacionamento))
 
 
 # ==============================================================
 # QUESTÃO 04
-# Lista todos os livros cadastrados
+# Lista todos os livros
 # ==============================================================
 def questao_04_listar_livros():
     with driver.session() as session:
-        result = session.run(
+        resultado = session.run(
             """
             MATCH (l:Livro)
             RETURN l.titulo AS titulo,
@@ -275,7 +273,7 @@ def questao_04_listar_livros():
             """
         )
 
-        livros = list(result)
+        livros = [dict(registro) for registro in resultado]
 
     print("Q04 - Livros encontrados:")
     for livro in livros:
@@ -284,11 +282,11 @@ def questao_04_listar_livros():
 
 # ==============================================================
 # QUESTÃO 05
-# Lista todos os autores cadastrados
+# Lista todos os autores
 # ==============================================================
 def questao_05_listar_autores():
     with driver.session() as session:
-        result = session.run(
+        resultado = session.run(
             """
             MATCH (a:Autor)
             RETURN a.nome AS nome,
@@ -297,7 +295,7 @@ def questao_05_listar_autores():
             """
         )
 
-        autores = list(result)
+        autores = [dict(registro) for registro in resultado]
 
     print("Q05 - Autores encontrados:")
     for autor in autores:
@@ -306,32 +304,38 @@ def questao_05_listar_autores():
 
 # ==============================================================
 # QUESTÃO 06
-# Busca um livro pelo título
+# Busca o livro Dom Casmurro
 # ==============================================================
 def questao_06_buscar_livro_por_titulo():
     titulo = "Dom Casmurro"
 
     with driver.session() as session:
-        result = session.run(
+        resultado = session.run(
             """
             MATCH (l:Livro {titulo: $titulo})
-            RETURN l
+            RETURN l.titulo AS titulo,
+                   l.ano AS ano,
+                   l.genero AS genero,
+                   l.paginas AS paginas
             """,
             titulo=titulo,
         )
 
-        livro = result.single()
+        livro = resultado.single()
 
-    print(f"Q06 - Livro encontrado: {livro}")
+    if livro:
+        print("Q06 - Livro encontrado:", dict(livro))
+    else:
+        print("Q06 - Livro não encontrado.")
 
 
 # ==============================================================
 # QUESTÃO 07
-# Atualiza o número de páginas do livro "1984"
+# Atualiza o livro 1984 para 340 páginas
 # ==============================================================
 def questao_07_atualizar_paginas():
     with driver.session() as session:
-        result = session.run(
+        resultado = session.run(
             """
             MATCH (l:Livro {titulo: '1984'})
             SET l.paginas = 340
@@ -340,9 +344,9 @@ def questao_07_atualizar_paginas():
             """
         )
 
-        livro = result.single()
+        livro = resultado.single()
 
-    print("Q07 - Páginas atualizadas:", livro)
+    print("Q07 - Páginas atualizadas:", dict(livro))
 
 
 # ==============================================================
@@ -353,7 +357,7 @@ def questao_08_livros_por_genero():
     genero = "Romance"
 
     with driver.session() as session:
-        result = session.run(
+        resultado = session.run(
             """
             MATCH (l:Livro)
             WHERE l.genero = $genero
@@ -364,7 +368,7 @@ def questao_08_livros_por_genero():
             genero=genero,
         )
 
-        livros = list(result)
+        livros = [dict(registro) for registro in resultado]
 
     print("Q08 - Livros do gênero Romance:")
     for livro in livros:
@@ -373,13 +377,13 @@ def questao_08_livros_por_genero():
 
 # ==============================================================
 # QUESTÃO 09
-# Lista os livros escritos por Machado de Assis
+# Lista os livros de Machado de Assis
 # ==============================================================
 def questao_09_livros_por_autor():
     autor = "Machado de Assis"
 
     with driver.session() as session:
-        result = session.run(
+        resultado = session.run(
             """
             MATCH (a:Autor {nome: $autor})-[:ESCREVEU]->(l:Livro)
             RETURN l.titulo AS titulo
@@ -388,7 +392,7 @@ def questao_09_livros_por_autor():
             autor=autor,
         )
 
-        livros = list(result)
+        livros = [dict(registro) for registro in resultado]
 
     print(f"Q09 - Livros de {autor}:")
     for livro in livros:
@@ -397,11 +401,11 @@ def questao_09_livros_por_autor():
 
 # ==============================================================
 # QUESTÃO 10
-# Lista todos os usuários e seus empréstimos
+# Lista usuários com empréstimos
 # ==============================================================
 def questao_10_usuarios_com_emprestimos():
     with driver.session() as session:
-        result = session.run(
+        resultado = session.run(
             """
             MATCH (u:Usuario)-[:EMPRESTOU]->(l:Livro)
             RETURN u.nome AS usuario,
@@ -410,7 +414,7 @@ def questao_10_usuarios_com_emprestimos():
             """
         )
 
-        emprestimos = list(result)
+        emprestimos = [dict(registro) for registro in resultado]
 
     print("Q10 - Empréstimos:")
     for emprestimo in emprestimos:
@@ -419,11 +423,11 @@ def questao_10_usuarios_com_emprestimos():
 
 # ==============================================================
 # QUESTÃO 11
-# Lista os empréstimos pendentes
+# Lista empréstimos ainda não devolvidos
 # ==============================================================
 def questao_11_emprestimos_pendentes():
     with driver.session() as session:
-        result = session.run(
+        resultado = session.run(
             """
             MATCH (u:Usuario)-[e:EMPRESTOU]->(l:Livro)
             WHERE e.devolvido = false
@@ -434,7 +438,7 @@ def questao_11_emprestimos_pendentes():
             """
         )
 
-        pendentes = list(result)
+        pendentes = [dict(registro) for registro in resultado]
 
     print("Q11 - Empréstimos pendentes:")
     for pendente in pendentes:
@@ -443,31 +447,31 @@ def questao_11_emprestimos_pendentes():
 
 # ==============================================================
 # QUESTÃO 12
-# Deleta o livro "O Cortiço"
+# Deleta o livro O Cortiço
 # ==============================================================
 def questao_12_deletar_livro():
     with driver.session() as session:
-        result = session.run(
+        resultado = session.run(
             """
             MATCH (l:Livro {titulo: 'O Cortiço'})
-            WITH l, count(l) AS quantidade
-            DETACH DELETE l
-            RETURN quantidade AS livros_deletados
+            WITH collect(l) AS livros
+            FOREACH (livro IN livros | DETACH DELETE livro)
+            RETURN size(livros) AS livros_deletados
             """
         )
 
-        resultado = result.single()
+        quantidade = resultado.single()
 
-    print("Q12 - Livro deletado:", resultado)
+    print("Q12 - Livro deletado:", dict(quantidade))
 
 
 # ==============================================================
 # QUESTÃO 13
-# Conta quantos livros cada autor escreveu
+# Conta os livros de cada autor
 # ==============================================================
 def questao_13_contar_livros_por_autor():
     with driver.session() as session:
-        result = session.run(
+        resultado = session.run(
             """
             MATCH (a:Autor)-[:ESCREVEU]->(l:Livro)
             RETURN a.nome AS autor,
@@ -476,7 +480,7 @@ def questao_13_contar_livros_por_autor():
             """
         )
 
-        contagem = list(result)
+        contagem = [dict(registro) for registro in resultado]
 
     print("Q13 - Livros por autor:")
     for registro in contagem:
@@ -485,11 +489,11 @@ def questao_13_contar_livros_por_autor():
 
 # ==============================================================
 # QUESTÃO 14
-# Lista os livros publicados após 1950
+# Lista livros publicados após 1950
 # ==============================================================
 def questao_14_livros_apos_1950():
     with driver.session() as session:
-        result = session.run(
+        resultado = session.run(
             """
             MATCH (l:Livro)
             WHERE l.ano > 1950
@@ -499,7 +503,7 @@ def questao_14_livros_apos_1950():
             """
         )
 
-        livros = list(result)
+        livros = [dict(registro) for registro in resultado]
 
     print("Q14 - Livros após 1950:")
     for livro in livros:
@@ -512,9 +516,9 @@ def questao_14_livros_apos_1950():
 # ==============================================================
 def questao_15_marcar_livros_disponiveis():
     with driver.session() as session:
-        result = session.run(
+        resultado = session.run(
             """
-            MATCH (u:Usuario)-[e:EMPRESTOU]->(l:Livro)
+            MATCH (:Usuario)-[e:EMPRESTOU]->(l:Livro)
             WHERE e.devolvido = true
             SET l.disponivel = true
             RETURN DISTINCT l.titulo AS livro,
@@ -523,7 +527,7 @@ def questao_15_marcar_livros_disponiveis():
             """
         )
 
-        livros = list(result)
+        livros = [dict(registro) for registro in resultado]
 
     print("Q15 - Livros marcados como disponíveis:")
     for livro in livros:
@@ -536,8 +540,9 @@ def questao_15_marcar_livros_disponiveis():
 if __name__ == "__main__":
     try:
         print("=" * 60)
-        print("EXERCÍCIO 01 - NÍVEL BÁSICO - Sistema de Biblioteca")
+        print("EXERCÍCIO 01 - NÍVEL BÁSICO - SISTEMA DE BIBLIOTECA")
         print("=" * 60)
+        print()
 
         setup_database()
 
@@ -557,10 +562,15 @@ if __name__ == "__main__":
         questao_14_livros_apos_1950()
         questao_15_marcar_livros_disponiveis()
 
-        print("\n✅ Exercício executado com sucesso!")
+        print()
+        print("=" * 60)
+        print("✅ TODAS AS QUESTÕES FORAM EXECUTADAS COM SUCESSO!")
+        print("=" * 60)
 
     except Exception as erro:
-        print(f"\n❌ Erro durante a execução: {erro}")
+        print()
+        print("❌ Ocorreu um erro durante a execução:")
+        print(erro)
 
     finally:
         driver.close()
