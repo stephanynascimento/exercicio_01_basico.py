@@ -25,15 +25,11 @@ def criar_driver():
 
 try:
     driver = criar_driver()
+
+    st.title("📚 Sistema de Biblioteca")
+    st.success("Conexão com o Neo4j Aura estabelecida com sucesso!")
+
 except Exception as erro:
     st.error("Não foi possível conectar ao Neo4j Aura.")
     st.code(str(erro))
     st.stop()
-
-
-# A partir daqui entram:
-# setup_database()
-# questao_01()
-# questao_02()
-# ...
-# interface do Streamlit
