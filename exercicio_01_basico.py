@@ -4,11 +4,15 @@ Banco de Grafos Neo4j com Python
 Tema: Sistema de Biblioteca
 """
 
+import streamlit as st
 from neo4j import GraphDatabase
 
+URI = st.secrets["NEO4J_URI"]
 
-URI = "bolt://localhost:7687"
-AUTH = ("neo4j", "password")
+AUTH = (
+    st.secrets["NEO4J_USER"],
+    st.secrets["NEO4J_PASSWORD"]
+)
 
 driver = GraphDatabase.driver(URI, auth=AUTH)
 
