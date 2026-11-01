@@ -1,4 +1,5 @@
 import streamlit as st
+from neo4j import GraphDatabase
 
 
 st.set_page_config(
@@ -7,43 +8,111 @@ st.set_page_config(
 )
 
 
+URI = "bolt://localhost:7687"
+USUARIO = "neo4j"
+SENHA = "password"
+
+
+@st.cache_resource
+def conectar_banco():
+    return GraphDatabase.driver(
+        URI,
+        auth=(USUARIO, SENHA)
+    )
+
+
+def executar_consulta(consulta, parametros=None):
+    driver = conectar_banco()
+
+    with driver.session() as session:
+        resultado = session.run(
+            consulta,
+            parametros or {}
+        )
+
+        return [registro.data() for registro in resultado]
+
+
 st.title("📚 Sistema de Biblioteca")
 
-st.write(
-    "Aplicação desenvolvida com Python, Neo4j e Streamlit."
-)
+st.write("Consultas do banco de dados Neo4j")
 
-st.success("O Streamlit está funcionando corretamente!")
 
-st.header("Atividade")
+if st.button("Inicializar banco de dados"):
+    try:
+        executar_consulta("MATCH (n) DETACH DELETE n")
 
-st.write("Este projeto contém 15 questões sobre um sistema de biblioteca.")
+        executar_consulta(
+            """
+            CREATE
+              (a:Autor {nome: 'Machado de Assis', nacionalidade: 'Brasileiro'}),
+              (a2:Autor {nome: 'Clarice Lispector', nacionalidade: 'Brasileira'}),
+              (a3:Autor {nome: 'George Orwell', nacionalidade: 'Britânico'}),
 
-questoes = [
-    "Questão 01 - Criar livro",
-    "Questão 02 - Criar autor",
-    "Questão 03 - Criar relacionamento",
-    "Questão 04 - Listar livros",
-    "Questão 05 - Listar autores",
-    "Questão 06 - Buscar livro por título",
-    "Questão 07 - Atualizar páginas",
-    "Questão 08 - Livros por gênero",
-    "Questão 09 - Livros por autor",
-    "Questão 10 - Usuários com empréstimos",
-    "Questão 11 - Empréstimos pendentes",
-    "Questão 12 - Deletar livro",
-    "Questão 13 - Contar livros por autor",
-    "Questão 14 - Livros após 1950",
-    "Questão 15 - Livros disponíveis"
-]
+              (l1:Livro {
+                  titulo: 'Dom Casmurro',
+                  ano: 1899,
+                  genero: 'Romance',
+                  paginas: 256
+              }),
 
-questao = st.selectbox(
-    "Escolha uma questão:",
-    questoes
-)
+              (l2:Livro {
+                  titulo: 'A Hora da Estrela',
+                  ano: 1977,
+                  genero: 'Romance',
+                  paginas: 88
+              }),
 
-st.write("Questão escolhida:")
-st.info(questao)
+              (l3:Livro {
+                  titulo: '1984',
+                  ano: 1949,
+                  genero: 'Distopia',
+                  paginas: 328
+              }),
 
-if st.button("Executar questão"):
-    st.success(f"{questao} selecionada com sucesso!")
+              (l4:Livro {
+                  titulo: 'Memórias Póstumas de Brás Cubas',
+                  ano: 1881,
+                  genero: 'Romance',
+                  paginas: 280
+              }),
+
+              (a)-[:ESCREVEU]->(l1),
+              (a2)-[:ESCREVEU]->(l2),
+              (a3)-[:ESCREVEU]->(l3),
+              (a)-[:ESCREVEU]->(l4)
+            """
+        )
+
+        st.success("Banco inicializado com sucesso!")
+
+    except Exception as erro:
+        st.error(f"Erro ao conectar ao Neo4j: {erro}")
+
+
+st.divider()
+
+
+if st.button("Listar livros"):
+    try:
+        livros = executar_consulta(
+            """
+            MATCH (l:Livro)
+            RETURN l.titulo AS titulo,
+                   l.ano AS ano,
+                   l.genero AS genero,
+                   l.paginas AS paginas
+            ORDER BY l.titulo
+            """
+        )
+
+        if livros:
+            st.dataframe(
+                livros,
+                use_container_width=True
+            )
+        else:
+            st.warning("Nenhum livro foi encontrado.")
+
+    except Exception as erro:
+        st.error(f"Erro ao buscar livros: {erro}")
